@@ -102,6 +102,7 @@ class IOSDriver(NetworkDriver):
                 pass
         self.global_delay_factor = optional_args.get('global_delay_factor', 1)
         self.port = optional_args.get('port', 22)
+        self.device_type = optional_args.get('device_type', 'cisco_ios')
 
         self.device = None
         self.config_replace = False
@@ -111,7 +112,7 @@ class IOSDriver(NetworkDriver):
 
     def open(self):
         """Open a connection to the device."""
-        self.device = ConnectHandler(device_type='cisco_ios',
+        self.device = ConnectHandler(device_type=self.device_type,
                                      host=self.hostname,
                                      username=self.username,
                                      password=self.password,
@@ -127,7 +128,13 @@ class IOSDriver(NetworkDriver):
 
     def close(self):
         """Close the connection to the device."""
-        self.device.disconnect()
+        # self.device.disconnect()
+        try:
+            self.device.disconnect()
+        except AttributeError:
+            # Added this to remove annoying messages about unable to close nontype objects
+            # Waiting for a fix https://github.com/napalm-automation/napalm-ios/issues/135
+            pass
 
     def _send_command(self, command):
         """Wrapper for self.device.send.command().
