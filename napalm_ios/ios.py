@@ -152,9 +152,15 @@ class IOSDriver(NetworkDriver):
 
     def is_alive(self):
         """Returns a flag with the state of the SSH connection."""
-        return {
-            'is_alive': self.device.remote_conn.transport.is_active()
-        }
+        # Added fix for nontype returns:
+        try:
+            return {
+                'is_alive': self.device.remote_conn.transport.is_active()
+            }
+        except AttributeError:
+            return {
+                'is_alive': False
+            }
 
     @staticmethod
     def _create_tmp_file(config):
